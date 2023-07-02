@@ -26,9 +26,10 @@ import XMonad.Layout.Simplest (Simplest (..))
 import XMonad.Layout.SubLayouts (GroupMsg (UnMerge), mergeDir, onGroup, subLayout)
 import XMonad.Layout.WorkspaceDir (changeDir, workspaceDir)
 import XMonad.Hooks.InsertPosition
-
+import XMonad.Util.ClickableWorkspaces
 import qualified XMonad.StackSet as W
-
+import XMonad.Util.SpawnOnce
+import XMonad.Actions.CopyWindow
 
 -- myKeys :: XConfig -> List 
 myKeys = 
@@ -36,29 +37,56 @@ myKeys =
  , ((mod4Mask, xK_s), spawn "steam")
  , ((mod4Mask .|. shiftMask, xK_l), spawn "xsecurelock") 
  , ((0, xK_Print), spawn "flameshot gui")
+ , ((mod1Mask, xK_space), spawn "rofi -show combi -combi-modes \"drun\"")
+ , ((mod1Mask, xK_Tab), spawn "rofi -show window")
+ , ((mod4Mask, xK_e), spawn "~/util/explore-with-dmenu/explore_with_dmenu")
+ , ((mod4Mask, xK_m), sendMessage $ JumpToLayout "monocle") --Switch to the full layout
  ]
 
---myManageHook = composeAll
---    [ className =? "spotify" --> doFloat
---    , isDialog               --> doFloat
---    ]
 
+myStartupHook :: X ()
+myStartupHook = do
+          spawnOnce "telegram-desktop"
+          spawnOnce "spotify"
+          spawnOnce "firefox"
 
 myManageHook :: ManageHook
 myManageHook = composeAll
-    [ className =? "Vivaldi-stable"   --> doShift (myWorkspaces !! 0)
-    , className =? "telegram-desktop" --> doShift (myWorkspaces !! 2)
+    [ className =? "firefox"          --> doShift (myWorkspaces !! 0)
+    , className =? "telegram-desktop" --> doShift (myWorkspaces !! 3)
     , className =? "discord"          --> doShift (myWorkspaces !! 2)
-    , className =? "mpv"              --> doShift (myWorkspaces !! 3)
-    , className =? "spotify"          --> doShift (myWorkspaces !! 2)
-    , className =? "Lua5.1"           --> doCenterFloat
+    , className =? "mpv"              --> doShift (myWorkspaces !! 4)
+    , className =? "spotify"          --> doShift (myWorkspaces !! 3)
+    , appName   =? "blueman-manager"  --> doCenterFloat
+    , appName   =? "pavucontrol"      --> doCenterFloat
     , className =? "Peek"             --> doCenterFloat
     , isDialog                        --> doCenterFloat
     , isFullscreen                    --> doFullFloat
+    , title     =? "Picture-in-Picture" --> doF copyToAll
+    , title     =? "Picture-in-Picture" --> doFloat
     , insertPosition Master Newer
     ] 
 
-myWorkspaces =  ["1:web","2:dev","3:soc","4:vid","5","6","7","8","9","0"]
+myWorkspaces =  ["1:<fn=1>\xf269</fn>",
+                 "2:<fn=1>\xf121</fn>",
+                 "3:<fn=1>\xf120</fn>",
+                 "4:<fn=1>\xf075</fn>",
+                 "5:<fn=1>\xf008</fn>",
+                 "6","7","8","9"]
+
+xmobarEscape :: String -> String
+xmobarEscape = concatMap doubleLts
+  where
+        doubleLts '<' = "<<"
+        doubleLts x   = [x]
+
+myClickableWorkspaces :: [String]
+myClickableWorkspaces = clickable . (map xmobarEscape)
+           $ myWorkspaces
+    where
+        clickable l = [ "<action=`xdotool key super+" ++ show (n) ++ "`>" ++ ws ++ "</action>" |
+                  (i,ws) <- zip [1..9] l,
+                  let n = i ]
 
 myConfig = def
     { terminal    = "alacritty"
@@ -66,7 +94,7 @@ myConfig = def
     , modMask     = mod4Mask
     , layoutHook  = myLayout
     , manageHook  = myManageHook <+> manageHook def
---    , handleEventHook = fullscreenEventHook
+    , startupHook = myStartupHook
     } `additionalKeys` myKeys
 
 myTabConfig :: Theme
@@ -130,7 +158,7 @@ myXmobarPP = def
     -- | Windows should have *some* title, which should not not exceed a
     -- sane length.
     ppWindow :: String -> String
-    ppWindow = xmobarRaw . (\w -> if null w then "untitled" else w) . shorten 40
+    ppWindow = xmobarRaw . (\w -> if null w then "untitled" else w) . shorten 20
 
     blue, lowWhite, magenta, red, white, yellow :: String -> String
     magenta  = xmobarColor "#ff79c6" ""
@@ -140,10 +168,12 @@ myXmobarPP = def
     red      = xmobarColor "#ff5555" ""
     lowWhite = xmobarColor "#bbbbbb" ""
 
+mySB = statusBarProp "xmobar" (pure myXmobarPP)
+
 main :: IO()
 main = xmonad
      . ewmhFullscreen
      . ewmh
-     . withEasySB (statusBarProp "xmobar" (pure myXmobarPP)) defToggleStrutsKey
+     . withEasySB mySB defToggleStrutsKey
      $ myConfig
 
