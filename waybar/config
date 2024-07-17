@@ -1,0 +1,137 @@
+{
+    "layer": "top", // Waybar at top layer
+    // "position": "bottom", // Waybar position (top|bottom|left|right)
+    "height": 30, // Waybar height (to be removed for auto height)
+    // "width": 1280, // Waybar width
+//    "spacing": 4, // Gaps between modules (4px)
+    // Choose the order of the modules
+    "modules-left": ["hyprland/workspaces", "custom/media", "cava"],
+    "modules-center": ["clock"],
+    "modules-right": ["custom/wireplumber-mic", "wireplumber", "backlight", "bluetooth", "network", "keyboard-state", "hyprland/language", "battery"],
+    // Modules configuration
+//    "custom/spotify": {
+//        "format": "{icon}{}",
+//        "escape": true,
+//        "return-type": "json",
+//        "max-length": 60,
+//        "on-click": "playerctl -p spotify play-pause",
+//        "exec": "$HOME/.config/waybar/mediaplayer.py --enable-logging -vvv 2> ~/.config/waybar/sp.log", // Script in resources/custom_modules folder
+//        "exec-if": "pgrep spotify"
+//    },
+//    "custom/media": {
+//      "format": "{icon} {}",
+//      "escape": true,
+//      "return-type": "json",
+//      "max-length": 40,
+//      "on-click": "playerctl play-pause",
+//      "on-click-right": "playerctl stop",
+//      // "smooth-scrolling-threshold": 10, // This value was tested using a trackpad, it should be lowered if using a mouse.
+//      // "on-scroll-up": "playerctl next",
+//      // "on-scroll-down": "playerctl previous",
+//      "exec": "$HOME/.config/waybar/mediaplayer.py 2> /dev/null", // Script in resources/custom_modules folder
+//    },
+    "hyprland/workspaces": {
+        "format": "{name}",
+        "on-scroll-up": "hyprctl dispatch workspace e+1",
+        "on-scroll-down": "hyprctl dispatch workspace e-1"
+    },
+    "keyboard-state": {
+        // "numlock": true,
+        "capslock": true,
+        "format": "{name} {icon}",
+        "format-icons": {
+            "locked": "",
+            "unlocked": ""
+        }
+    },
+    "idle_inhibitor": {
+        "format": "{icon}",
+        "format-icons": {
+            "activated": "",
+            "deactivated": ""
+        }
+    },
+    "tray": {
+        // "icon-size": 21,
+        "spacing": 10
+    },
+    "clock": {
+        "interval": 1,
+        "format": "{:%I:%M:%S %p}",
+        "format-alt": "{:%A, %B %d, %Y (%I:%M:%S %p)}",
+        "tooltip-format": "<tt><small>{calendar}</small></tt>",
+    },  
+    "hyprland/language": {
+      "format": "{}",
+      "format-en": "EN",
+      "format-ru": "RU"
+    },
+    "backlight": {
+        // "device": "acpi_video1",
+        "format": "{percent:3}% {icon}",
+        "format-icons": [""]
+    },
+    "battery": {
+        "states": {
+            // "good": 95,
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{capacity}% {icon}",
+        "format-charging": "{capacity}% ",
+        "format-plugged": "{capacity}% ",
+        // "format-alt": "{time} {icon}",
+        // "format-good": "", // An empty format will hide the module
+        // "format-full": "",
+        "format-icons": ["", "", "", "", ""]
+    },
+
+    "network": {
+        "interface": "wlan0", // (Optional) To force the use of this interface
+        "format-wifi": "",
+        "format-ethernet": "",
+        "tooltip-format": "",
+        "on-click-right": "cmst",
+        "format-linked": "",
+        "format-disconnected": "⚠",
+        //"format-alt": "{ifname}: {ipaddr}/{cidr}"
+    },
+    "wireplumber": {
+        "format": "{volume:3}% {icon}",
+        "format-muted": " mut ",
+        "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+        "on-click-right": "pavucontrol",
+        "on-click-middle": "helvum",
+        "format-icons": ["", "", ""]
+    },
+
+    "custom/wireplumber-mic": {
+        "exec": "$HOME/.config/waybar/mic.py",
+        "restart-interval": 1,
+        "return-type": "json",
+        "format": "{:3} {icon}", 
+        "format-icons": {
+            "muted": "",
+            "unmuted": " ",
+        },
+        "on-click-right": "pavucontrol",
+        "on-click-middle": "helvum",
+        "on-scroll-up": "wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SOURCE@ 1%+",
+        "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SOURCE@ 1%-",
+        "exec-on-event": true,
+        "on-click": "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle",
+    },
+
+
+    "bluetooth": {
+        "format": "{status:3} ",
+        "format-connected": "con ",
+        //"format-connected-battery": "{device_alias} {device_battery_percentage}% ",
+        //"tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected",
+        //"tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}",
+        //"tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
+        //"tooltip-format-enumerate-connected-battery": "{device_alias}\t{device_address}\t{device_battery_percentage}%"
+    }
+
+}
+
