@@ -29,50 +29,44 @@ import XMonad.Hooks.InsertPosition
 import XMonad.Util.ClickableWorkspaces
 import qualified XMonad.StackSet as W
 import XMonad.Util.SpawnOnce
+import XMonad.Actions.SpawnOn
 import XMonad.Actions.CopyWindow
 
 -- myKeys :: XConfig -> List 
 myKeys = 
- [ ((mod4Mask, xK_f), spawn "firefox")
- , ((mod4Mask, xK_s), spawn "steam")
+ [ ((mod4Mask, xK_f), spawn "firefox") 
  , ((mod4Mask .|. shiftMask, xK_l), spawn "xsecurelock") 
  , ((0, xK_Print), spawn "flameshot gui")
  , ((mod1Mask, xK_space), spawn "rofi -show combi -combi-modes \"drun\"")
  , ((mod1Mask, xK_Tab), spawn "rofi -show window")
- , ((mod4Mask, xK_e), spawn "~/util/explore-with-dmenu/explore_with_dmenu")
  , ((mod4Mask, xK_m), sendMessage $ JumpToLayout "monocle") --Switch to the full layout
  ]
 
 
 myStartupHook :: X ()
 myStartupHook = do
-          spawnOnce "telegram-desktop"
-          spawnOnce "spotify"
-          spawnOnce "firefox"
+          spawnOn "3:" "~/.nix-profile/bin/telegram-desktop"
+          spawnOn "4:" "~/.nix-profile/bin/spotify"
+          spawnOn "2:" "~/.nix-profile/bin/firefox"
+	  spawnOn "1:" "alacritty"
 
 myManageHook :: ManageHook
 myManageHook = composeAll
-    [ className =? "firefox"          --> doShift (myWorkspaces !! 0)
-    , className =? "telegram-desktop" --> doShift (myWorkspaces !! 3)
-    , className =? "discord"          --> doShift (myWorkspaces !! 2)
-    , className =? "mpv"              --> doShift (myWorkspaces !! 4)
-    , className =? "spotify"          --> doShift (myWorkspaces !! 3)
-    , appName   =? "blueman-manager"  --> doCenterFloat
+    [ className =? "firefox"          --> doShift (myWorkspaces !! 1)
+    , className =? "TelegramDesktop"  --> doShift (myWorkspaces !! 2)
+    , className =? "Spotify"          --> doShift (myWorkspaces !! 3)
     , appName   =? "pavucontrol"      --> doCenterFloat
-    , className =? "Peek"             --> doCenterFloat
     , isDialog                        --> doCenterFloat
     , isFullscreen                    --> doFullFloat
-    , title     =? "Picture-in-Picture" --> doF copyToAll
-    , title     =? "Picture-in-Picture" --> doFloat
     , insertPosition Master Newer
     ] 
 
-myWorkspaces =  ["1:<fn=1>\xf269</fn>",
-                 "2:<fn=1>\xf121</fn>",
-                 "3:<fn=1>\xf120</fn>",
-                 "4:<fn=1>\xf075</fn>",
-                 "5:<fn=1>\xf008</fn>",
-                 "6","7","8","9"]
+myWorkspaces =  ["1:",
+                 "2:",
+                 "3:",
+                 "4:",
+                 "5:",
+                 "6:","7:","8:","9:"]
 
 xmobarEscape :: String -> String
 xmobarEscape = concatMap doubleLts
@@ -93,7 +87,7 @@ myConfig = def
     , workspaces  = myWorkspaces
     , modMask     = mod4Mask
     , layoutHook  = myLayout
-    , manageHook  = myManageHook <+> manageHook def
+    , manageHook  = myManageHook <+> doF W.swapDown <+> manageHook def
     , startupHook = myStartupHook
     } `additionalKeys` myKeys
 
@@ -112,20 +106,20 @@ tall    = renamed [Replace "tall"]
           $ addTabs shrinkText myTabConfig . subLayout [] Simplest
           $ avoidStruts
           $ mySpacing 10
-          $ ResizableTall 1 (3 / 100) (1 / 2) []
+          $ ResizableTall 1 (1 / 100) (1 / 2) []
 
 wide    = renamed [Replace "wide"]
           $ addTabs shrinkText myTabConfig . subLayout [] Simplest
           $ avoidStruts
           $ mySpacing 10
           $ Mirror
-          $ ResizableTall 1 (3 / 100) (3 / 4) []
+          $ ResizableTall 1 (1 / 100) (3 / 4) []
 
 columns = renamed [Replace "columns"]
           $ addTabs shrinkText myTabConfig . subLayout [] Simplest
           $ avoidStruts
           $ mySpacing 10
-          $ ThreeColMid 1 (3 / 100) (12 / 30)
+          $ ThreeColMid 1 (1 / 100) (12 / 30)
 
 myLayout = workspaceDir "/home/vmedv"
                $ smartBorders
@@ -148,8 +142,8 @@ myXmobarPP = def
     , ppHidden          = white . wrap " " ""
     , ppHiddenNoWindows = lowWhite . wrap " " ""
     , ppUrgent          = red . wrap (yellow "!") (yellow "!")
-    , ppOrder           = \[ws, l, _, wins] -> [ws, l, wins]
-    , ppExtras          = [logTitles formatFocused formatUnfocused]
+    -- , ppOrder           = \[ws, l, _, wins] -> [ws, l, wins]
+    -- , ppExtras          = [logTitles formatFocused formatUnfocused]
     }
   where
     formatFocused   = wrap (white    "[") (white    "]") . magenta . ppWindow
